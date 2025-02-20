@@ -50,6 +50,7 @@ async function run() {
             res.send(result);
         })
 
+
         // send add car information to database
         app.post('/allCars', async (req, res) => {
             const newCar = req.body;
@@ -71,6 +72,38 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await carsCollection.deleteOne(query);
             res.send(result);
+        })
+
+        // get data from my cars by id and get a single document for update
+        app.get('/myCars/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await carsCollection.findOne(query);
+            res.send(result);
+        })
+
+        // set up updated data
+        app.put('/myCars/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updatedCar = req.body;
+            const car = {
+                $set: {
+                    model: updatedCar.model,
+                    price: updatedCar.price,
+                    available: updatedCar.available,
+                    registration_number: updatedCar.registration_number,
+                    features: updatedCar.features,
+                    description: updatedCar.description,
+                    booking_count: updatedCar.booking_count,
+                    image: updatedCar.image,
+                    location: updatedCar.location,
+                    datePosted: updatedCar.datePosted
+                }
+            }
+            const result = await carsCollection.updateOne(filter, options, car);
+            res.send(result)
         })
 
     } finally {
