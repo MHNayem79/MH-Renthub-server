@@ -50,6 +50,29 @@ async function run() {
             res.send(result);
         })
 
+        // send add car information to database
+        app.post('/allCars', async (req, res) => {
+            const newCar = req.body;
+            const result = await carsCollection.insertOne(newCar);
+            res.send(result);
+        })
+
+        // get my added cars data by gmail
+        app.get('/myCars', async (req, res) => {
+            const email = req.query.email;
+            const query = { carAdder: email }
+            const result = await carsCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        // delete from my added cars by id
+        app.delete('/myCars/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await carsCollection.deleteOne(query);
+            res.send(result);
+        })
+
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
