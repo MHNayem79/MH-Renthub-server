@@ -29,6 +29,9 @@ async function run() {
 
         // cars related apis
         const carsCollection = client.db('cars-collection').collection('cars')
+        const bookingCollection = client.db('cars-collection').collection('booking')
+
+
         // recent cars added shows on homepage
         app.get('/cars', async (req, res) => {
             const cursor = carsCollection.find().limit(6);
@@ -57,6 +60,19 @@ async function run() {
             const result = await carsCollection.insertOne(newCar);
             res.send(result);
         })
+        // send booking car information to database
+        app.post('/myBookings', async (req, res) => {
+            const bookingData = req.body;
+            const result = await bookingCollection.insertOne(bookingData);
+            res.send(result);
+        })
+
+        // available booking cars shows on my bookings
+        app.get('/myBookings', async (req, res) => {
+            const cursor = bookingCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
         // get my added cars data by gmail
         app.get('/myCars', async (req, res) => {
@@ -81,6 +97,13 @@ async function run() {
             const result = await carsCollection.findOne(query);
             res.send(result);
         })
+        // get data from my bookings by id and get a single document for update
+        app.get('/myBookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await bookingCollection.findOne(query);
+            res.send(result);
+        })
 
         // set up updated data
         app.put('/myCars/:id', async (req, res) => {
@@ -102,7 +125,22 @@ async function run() {
                     datePosted: updatedCar.datePosted
                 }
             }
-            const result = await carsCollection.updateOne(filter, options, car);
+            const result = await carsCollection.updateOne(filter, car, options);
+            res.send(result)
+        })
+        // set up booking updated data
+        app.put('/myBookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updatedBooking = req.body;
+            const car = {
+                $set: {
+                    bookingDate: updatedBooking.bookingDate,
+
+                }
+            }
+            const result = await bookingCollection.updateOne(filter, car, options);
             res.send(result)
         })
 
